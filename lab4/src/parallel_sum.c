@@ -1,18 +1,12 @@
-#include <ctype.h>
 #include <getopt.h>
-#include <limits.h>
 #include <pthread.h>
-#include <signal.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <time.h>
-#include <unistd.h>
 
 #include "utils.h"
 #include "sum.h"
@@ -24,9 +18,9 @@ void *ThreadSum(void *args) {
 }
 
 int main(int argc, char **argv) {
- int threads_num = -1;
-  int array_size = -1;
-  int seed = -1;
+ int threads_num = 0;
+  int array_size = 0;
+  int seed = 0;
   pthread_t threads[threads_num];
   while (true) {
     static struct option options[] = {{"seed", required_argument, 0, 0},
@@ -45,21 +39,21 @@ int main(int argc, char **argv) {
           case 0:
             seed = atoi(optarg);
             if (seed <= 0) {
-              printf("seed must be a positive number!\n");
+              printf("seed must be > 0\n");
               return 1;
             }
             break;
           case 1:
             array_size = atoi(optarg);
             if (array_size <= 0) {
-              printf("array size must be a positive number!\n");
+              printf("array size must be > 0\n");
               return 1;
             }
             break;
           case 2:
             threads_num = atoi(optarg);
             if (threads_num <= 0) {
-              printf("threads_num must be a positive number!\n");
+              printf("threads_num must be > 0\n");
               return 1;
             }
             break;
@@ -78,11 +72,11 @@ int main(int argc, char **argv) {
   }
 
   if (optind < argc) {
-    printf("Has at least one no option argument\n");
+    printf("has one no option argument\n");
     return 1;
   }
 
-  if (seed == -1 || array_size == -1 || threads_num == -1) {
+  if (seed == 0 || array_size == 0 || threads_num == 0) {
     printf(
         "Usage: %s --seed \"num\" --array_size \"num\" --threads_num \"num\" "
         "\n",
@@ -97,7 +91,7 @@ int main(int argc, char **argv) {
 
   int part = array_size / threads_num;
   struct SumArgs args[threads_num];
-  for (uint32_t i = 0; i < threads_num; i++) {
+  for (int i = 0; i < threads_num; i++) {
     args[i].begin = i * part;
     args[i].end = (i == threads_num - 1) ? array_size : (i + 1) * part;
     args[i].array = array;
